@@ -92,5 +92,47 @@ object Model0 {
 }
 
 object Model {
-
+  type Index = (Int, Int)
+  type Number = Option[Int]
+  case class Move(from: Index, to: Index, conflict: Boolean)
+  trait Swipe
+  object Up extends Swipe
+  object Down extends Swipe
+  object Left extends Swipe
+  object Right extends Swipe
+  case class Matrix(n: Int, xAxis: Boolean, array: Array[Number]) {
+    require(array.length == n * n)
+    private def to1D(ij: Index): Int = {
+      val (i, j) = ij
+      if (xAxis) {
+        n * j + i
+      } else {
+        n * i + j
+      }
+    }
+    // very slow. sub-optimal
+    def updated(ij: Index, x: Number): Matrix = {
+      Matrix(n, xAxis, array.updated(to1D(ij), x))
+    }
+    def toArray(xAxis: Boolean): Array[Array[Number]] = {
+      val array1D: Seq[Number] = if (this.xAxis == xAxis) {
+        array
+      } else {
+        (if (xAxis) {
+          (0 until n).map(j => (0 until n).map(i => (i, j)))
+        } else {
+          (0 until n).map(i => (0 until n).map(j => (i, j)))
+        }).flatten.map(ij => array(to1D(ij)))
+      }
+      array1D.sliding(n).toArray.map(_.toArray)
+    }
+  }
+  case class SwipeResult(
+    state: Matrix,
+    moves: Array[Move],
+    doubles: Array[Index]
+  )
+  def swipe(mat: Matrix, swipe: Swipe): SwipeResult = {
+    ???
+  }
 }

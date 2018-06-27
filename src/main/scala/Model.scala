@@ -1,6 +1,6 @@
 package model_2048
 
-object Model {
+object Model0 {
   type Index = Int
 
   type Number = Option[Int]
@@ -20,8 +20,32 @@ object Model {
     cursor: Index
   )
 
-  def swipe0(initState: Array[Number]): Swipe0Result = {
+  def swipe(initState: Array[Number], upward: Boolean): Swipe0Result = {
+    if (!upward) {
+      swipe0(initState)
+    } else {
+      val initStateRev = initState.reverse
+      val result = swipe0(initStateRev)
+      val N = initState.length
+      def _invert(i: Index): Index = {
+        N - 1 - i
+      }
+      def __invert(m: Move): Move = {
+        Move(
+          _invert(m.from),
+          _invert(m.to),
+          m.conflict
+        )
+      }
+      Swipe0Result(
+        state = result.state.reverse,
+        moves = result.moves.map(__invert),
+        doubles = result.doubles.map(_invert)
+      )
+    }
+  }
 
+  def swipe0(initState: Array[Number]): Swipe0Result = {
     val initAcc = Acc(
       state = Array.fill[Number](initState.length){ None },
       moves = Array.empty,
@@ -65,4 +89,8 @@ object Model {
     }
     Swipe0Result(acc.state, acc.moves, acc.doubles)
   }
+}
+
+object Model {
+
 }

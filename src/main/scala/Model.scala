@@ -2,24 +2,19 @@ package model_2048
 
 object Model0 {
   type Index = Int
-
   type Number = Option[Int]
-
   case class Move(from: Index, to: Index, conflict: Boolean)
-
   case class Swipe0Result(
     state: Array[Number],
     moves: Array[Move],
     doubles: Array[Index]
   )
-
   case class Acc(
     state: Array[Number],
     moves: Array[Move],
     doubles: Array[Index],
     cursor: Index
   )
-
   def swipe(initState: Array[Number], upward: Boolean): Swipe0Result = {
     if (!upward) {
       swipe0(initState)
@@ -44,7 +39,6 @@ object Model0 {
       )
     }
   }
-
   def swipe0(initState: Array[Number]): Swipe0Result = {
     val initAcc = Acc(
       state = Array.fill[Number](initState.length){ None },
@@ -52,7 +46,7 @@ object Model0 {
       doubles = Array.empty,
       cursor = 0
     )
-    val acc = initState.zipWithIndex.foldLeft(initAcc){ (acc: Acc, x: (Number, Index)) =>
+    val acc = initState.zipWithIndex.foldLeft(initAcc){ case (acc: Acc, x: (Number, Index)) =>
       val traverseAt = x._2
       val traverseNum0 = x._1
       traverseNum0 match {
@@ -127,12 +121,28 @@ object Model {
       array1D.sliding(n).toArray.map(_.toArray)
     }
   }
+  case class SwipeResult0(
+    state: Array[Number],
+    moves: Array[Move],
+    doubles: Array[Index]
+  )
+  def fold(n: Int, xAxis: Boolean, results: Seq[SwipeResult0]): SwipeResult = { ??? }
   case class SwipeResult(
     state: Matrix,
     moves: Array[Move],
     doubles: Array[Index]
   )
-  def swipe(mat: Matrix, swipe: Swipe): SwipeResult = {
-    ???
+  def swipe(initState: Matrix, swipe: Swipe): SwipeResult = {
+    swipe match {
+      case Left =>
+        val results: Seq[SwipeResult0] = initState.toArray(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
+          SwipeResult0(
+            state = result.state,
+            moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),
+            doubles = result.doubles.map(d0 => (d0, j))
+          )
+        }
+        fold(initState.n, initState.xAxis, results)
+    }
   }
 }

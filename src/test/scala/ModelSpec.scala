@@ -25,7 +25,7 @@ class ModelSpec extends FlatSpec with Matchers {
       Matrix(3,true,Array(None,None,None,None,Some(2),None,None,None,None)),
       Up
     )
-    result.state shouldBe Matrix(3,true,Array(None,Some(2),None,None,None,None,None,None,None))
+    result.state shouldBe Matrix(3,false,Array(None,None,None,Some(2),None,None,None,None,None))
     result.moves shouldBe Array(Move((1,1),(1,0),false))
     result.doubles shouldBe Array()
   }
@@ -34,7 +34,7 @@ class ModelSpec extends FlatSpec with Matchers {
       Matrix(3,true,Array(None,None,None,None,Some(2),None,None,None,None)),
       Down
     )
-    result.state shouldBe Matrix(3,true,Array(None,None,None,None,None,None,None,Some(2),None))
+    result.state shouldBe Matrix(3,false,Array(None,None,None,None,None,Some(2),None,None,None))
     result.moves shouldBe Array(Move((1,1),(1,2),false))
     result.doubles shouldBe Array()
   }

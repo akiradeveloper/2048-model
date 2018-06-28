@@ -4,7 +4,7 @@ object Model0 {
   type Index = Int
   type Number = Option[Int]
   case class Move(from: Index, to: Index, conflict: Boolean)
-  case class Swipe0Result(
+  case class Result(
     state: Seq[Number],
     moves: Seq[Move],
     doubles: Seq[Index]
@@ -15,31 +15,7 @@ object Model0 {
     doubles: Seq[Index],
     cursor: Index
   )
-  def swipe(initState: Seq[Number], upward: Boolean): Swipe0Result = {
-    if (!upward) {
-      swipe0(initState)
-    } else {
-      val initStateRev = initState.reverse
-      val result = swipe0(initStateRev)
-      val N = initState.length
-      def _invert(i: Index): Index = {
-        N - 1 - i
-      }
-      def __invert(m: Move): Move = {
-        Move(
-          _invert(m.from),
-          _invert(m.to),
-          m.conflict
-        )
-      }
-      Swipe0Result(
-        state = result.state.reverse,
-        moves = result.moves.map(__invert),
-        doubles = result.doubles.map(_invert)
-      )
-    }
-  }
-  def swipe0(initState: Seq[Number]): Swipe0Result = {
+  def swipe0(initState: Seq[Number]): Result = {
     val initAcc = Acc(
       state = Seq.fill[Number](initState.length){ None },
       moves = Seq.empty,
@@ -81,7 +57,31 @@ object Model0 {
           }
       }
     }
-    Swipe0Result(acc.state, acc.moves, acc.doubles)
+    Result(acc.state, acc.moves, acc.doubles)
+  }
+  def swipe(initState: Seq[Number], upward: Boolean): Result = {
+    if (!upward) {
+      swipe0(initState)
+    } else {
+      val initStateRev = initState.reverse
+      val result = swipe0(initStateRev)
+      val N = initState.length
+      def _invert(i: Index): Index = {
+        N - 1 - i
+      }
+      def __invert(m: Move): Move = {
+        Move(
+          _invert(m.from),
+          _invert(m.to),
+          m.conflict
+        )
+      }
+      Result(
+        state = result.state.reverse,
+        moves = result.moves.map(__invert),
+        doubles = result.doubles.map(_invert)
+      )
+    }
   }
 }
 
@@ -121,31 +121,28 @@ object Model {
       array1D.sliding(size=n, step=n).toSeq
     }
   }
-  def debug(arr: Seq[Number]): String = {
-    "[" + arr.map(_.toString).mkString(",") + "]"
-  }
-  case class SwipeResult0(
+  case class Result0(
     state: Seq[Number],
     moves: Seq[Move],
     doubles: Seq[Index]
   )
-  def fold(n: Int, xAxis: Boolean, results: Seq[SwipeResult0]): SwipeResult = {
-    SwipeResult(
+  def fold(n: Int, xAxis: Boolean, results: Seq[Result0]): Result = {
+    Result(
       state = Matrix(n, xAxis, results.map(_.state).flatten),
       moves = results.map(_.moves).flatten,
       doubles = results.map(_.doubles).flatten
     )
   }
-  case class SwipeResult(
+  case class Result(
     state: Matrix,
     moves: Seq[Move],
     doubles: Seq[Index]
   )
-  def swipe(initState: Matrix, swipe: Swipe): SwipeResult = {
+  def swipe(initState: Matrix, swipe: Swipe): Result = {
     swipe match {
       case Left =>
-        val results: Seq[SwipeResult0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
-          SwipeResult0(
+        val results: Seq[Result0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Result, j: Int) =>
+          Result0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),
             doubles = result.doubles.map(d0 => (d0, j))
@@ -153,8 +150,8 @@ object Model {
         }
         fold(initState.n, xAxis = true, results)
       case Right =>
-        val results: Seq[SwipeResult0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
-          SwipeResult0(
+        val results: Seq[Result0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Result, j: Int) =>
+          Result0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),
             doubles = result.doubles.map(d0 => (d0, j))
@@ -162,8 +159,8 @@ object Model {
         }
         fold(initState.n, xAxis = true, results)
       case Up =>
-        val results: Seq[SwipeResult0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, i: Int) =>
-          SwipeResult0(
+        val results: Seq[Result0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Result, i: Int) =>
+          Result0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (i, m0.from), to = (i, m0.to), m0.conflict)),
             doubles = result.doubles.map(d0 => (i, d0))
@@ -171,8 +168,8 @@ object Model {
         }
         fold(initState.n, xAxis = false, results)
       case Down =>
-        val results: Seq[SwipeResult0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Swipe0Result, i: Int) =>
-          SwipeResult0(
+        val results: Seq[Result0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Result, i: Int) =>
+          Result0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (i, m0.from), to = (i, m0.to), m0.conflict)),
             doubles = result.doubles.map(d0 => (i, d0))

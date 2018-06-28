@@ -108,7 +108,7 @@ object Model {
     def updated(ij: Index, x: Number): Matrix = {
       Matrix(n, xAxis, array.updated(to1D(ij), x))
     }
-    def toArray(xAxis: Boolean): Array[Array[Number]] = {
+    def toArrays(xAxis: Boolean): Array[Array[Number]] = {
       val array1D: Seq[Number] = if (this.xAxis == xAxis) {
         array
       } else {
@@ -118,15 +118,24 @@ object Model {
           (0 until n).map(i => (0 until n).map(j => (i, j)))
         }).flatten.map(ij => array(to1D(ij)))
       }
-      array1D.sliding(n).toArray.map(_.toArray)
+      array1D.sliding(size=n, step=n).toArray.map(_.toArray)
     }
+  }
+  def debug(arr: Array[Number]): String = {
+    "[" + arr.map(_.toString).mkString(",") + "]"
   }
   case class SwipeResult0(
     state: Array[Number],
     moves: Array[Move],
     doubles: Array[Index]
   )
-  def fold(n: Int, xAxis: Boolean, results: Seq[SwipeResult0]): SwipeResult = { ??? }
+  def fold(n: Int, xAxis: Boolean, results: Seq[SwipeResult0]): SwipeResult = {
+    SwipeResult(
+      state = Matrix(n, xAxis, results.map(_.state).flatten.toArray),
+      moves = results.map(_.moves).flatten.toArray,
+      doubles = results.map(_.doubles).flatten.toArray
+    )
+  }
   case class SwipeResult(
     state: Matrix,
     moves: Array[Move],
@@ -135,14 +144,14 @@ object Model {
   def swipe(initState: Matrix, swipe: Swipe): SwipeResult = {
     swipe match {
       case Left =>
-        val results: Seq[SwipeResult0] = initState.toArray(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
+        val results: Seq[SwipeResult0] = initState.toArrays(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
           SwipeResult0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),
             doubles = result.doubles.map(d0 => (d0, j))
           )
         }
-        fold(initState.n, initState.xAxis, results)
+        fold(initState.n, xAxis = true, results)
     }
   }
 }

@@ -5,17 +5,17 @@ object Model0 {
   type Number = Option[Int]
   case class Move(from: Index, to: Index, conflict: Boolean)
   case class Swipe0Result(
-    state: Array[Number],
-    moves: Array[Move],
-    doubles: Array[Index]
+    state: Seq[Number],
+    moves: Seq[Move],
+    doubles: Seq[Index]
   )
   case class Acc(
-    state: Array[Number],
-    moves: Array[Move],
-    doubles: Array[Index],
+    state: Seq[Number],
+    moves: Seq[Move],
+    doubles: Seq[Index],
     cursor: Index
   )
-  def swipe(initState: Array[Number], upward: Boolean): Swipe0Result = {
+  def swipe(initState: Seq[Number], upward: Boolean): Swipe0Result = {
     if (!upward) {
       swipe0(initState)
     } else {
@@ -39,11 +39,11 @@ object Model0 {
       )
     }
   }
-  def swipe0(initState: Array[Number]): Swipe0Result = {
+  def swipe0(initState: Seq[Number]): Swipe0Result = {
     val initAcc = Acc(
-      state = Array.fill[Number](initState.length){ None },
-      moves = Array.empty,
-      doubles = Array.empty,
+      state = Seq.fill[Number](initState.length){ None },
+      moves = Seq.empty,
+      doubles = Seq.empty,
       cursor = 0
     )
     val acc = initState.zipWithIndex.foldLeft(initAcc){ case (acc: Acc, x: (Number, Index)) =>
@@ -94,7 +94,7 @@ object Model {
   object Down extends Swipe
   object Left extends Swipe
   object Right extends Swipe
-  case class Matrix(n: Int, xAxis: Boolean, array: Array[Number]) {
+  case class Matrix(n: Int, xAxis: Boolean, array: Seq[Number]) {
     require(array.length == n * n)
     private def to1D(ij: Index): Int = {
       val (i, j) = ij
@@ -108,7 +108,7 @@ object Model {
     def updated(ij: Index, x: Number): Matrix = {
       Matrix(n, xAxis, array.updated(to1D(ij), x))
     }
-    def toArrays(xAxis: Boolean): Array[Array[Number]] = {
+    def sliding(xAxis: Boolean): Seq[Seq[Number]] = {
       val array1D: Seq[Number] = if (this.xAxis == xAxis) {
         array
       } else {
@@ -118,33 +118,33 @@ object Model {
           (0 until n).map(i => (0 until n).map(j => (i, j)))
         }).flatten.map(ij => array(to1D(ij)))
       }
-      array1D.sliding(size=n, step=n).toArray.map(_.toArray)
+      array1D.sliding(size=n, step=n).toSeq
     }
   }
-  def debug(arr: Array[Number]): String = {
+  def debug(arr: Seq[Number]): String = {
     "[" + arr.map(_.toString).mkString(",") + "]"
   }
   case class SwipeResult0(
-    state: Array[Number],
-    moves: Array[Move],
-    doubles: Array[Index]
+    state: Seq[Number],
+    moves: Seq[Move],
+    doubles: Seq[Index]
   )
   def fold(n: Int, xAxis: Boolean, results: Seq[SwipeResult0]): SwipeResult = {
     SwipeResult(
-      state = Matrix(n, xAxis, results.map(_.state).flatten.toArray),
-      moves = results.map(_.moves).flatten.toArray,
-      doubles = results.map(_.doubles).flatten.toArray
+      state = Matrix(n, xAxis, results.map(_.state).flatten),
+      moves = results.map(_.moves).flatten,
+      doubles = results.map(_.doubles).flatten
     )
   }
   case class SwipeResult(
     state: Matrix,
-    moves: Array[Move],
-    doubles: Array[Index]
+    moves: Seq[Move],
+    doubles: Seq[Index]
   )
   def swipe(initState: Matrix, swipe: Swipe): SwipeResult = {
     swipe match {
       case Left =>
-        val results: Seq[SwipeResult0] = initState.toArrays(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
+        val results: Seq[SwipeResult0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
           SwipeResult0(
             state = result.state,
             moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),

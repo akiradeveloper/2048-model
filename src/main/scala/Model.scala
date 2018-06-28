@@ -152,6 +152,33 @@ object Model {
           )
         }
         fold(initState.n, xAxis = true, results)
+      case Right =>
+        val results: Seq[SwipeResult0] = initState.sliding(xAxis = true).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Swipe0Result, j: Int) =>
+          SwipeResult0(
+            state = result.state,
+            moves = result.moves.map(m0 => Model.Move(from = (m0.from, j), to = (m0.to, j), m0.conflict)),
+            doubles = result.doubles.map(d0 => (d0, j))
+          )
+        }
+        fold(initState.n, xAxis = true, results)
+      case Up =>
+        val results: Seq[SwipeResult0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = false)).zipWithIndex.map { case (result: Model0.Swipe0Result, i: Int) =>
+          SwipeResult0(
+            state = result.state,
+            moves = result.moves.map(m0 => Model.Move(from = (i, m0.from), to = (i, m0.to), m0.conflict)),
+            doubles = result.doubles.map(d0 => (i, d0))
+          )
+        }
+        fold(initState.n, xAxis = false, results)
+      case Down =>
+        val results: Seq[SwipeResult0] = initState.sliding(xAxis = false).map(arr => Model0.swipe(arr, upward = true)).zipWithIndex.map { case (result: Model0.Swipe0Result, i: Int) =>
+          SwipeResult0(
+            state = result.state,
+            moves = result.moves.map(m0 => Model.Move(from = (i, m0.from), to = (i, m0.to), m0.conflict)),
+            doubles = result.doubles.map(d0 => (i, d0))
+          )
+        }
+        fold(initState.n, xAxis = false, results)
     }
   }
 }

@@ -9,6 +9,12 @@ class Model0Spec extends FlatSpec {
     assert(result.moves === Array(Move(0,0,false)))
     assert(result.doubles === Array())
   }
+  it should "swipe 2,4" in {
+    val result = swipe0(Array(Some(2),Some(4)))
+    assert(result.state === Array(Some(2),Some(4)))
+    assert(result.moves === Array(Move(0,0,false),Move(1,1,false)))
+    assert(result.doubles === Array())
+  }
   it should "swipe _,2" in {
     val result = swipe0(Array(None, Some(2), None))
     assert(result.state === Array(Some(2),None,None))
